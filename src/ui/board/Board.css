@@ -1,0 +1,140 @@
+.board {
+  position: relative;
+  flex: none;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow: hidden;
+}
+
+.board--dragging,
+.board--dragging .piece--grab {
+  cursor: grabbing;
+}
+
+.board-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.board-cell {
+  position: absolute;
+  width: 12.5%;
+  height: 12.5%;
+}
+
+.square--light {
+  background: var(--sq-light);
+}
+
+.square--dark {
+  background: var(--sq-dark);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+}
+
+.overlay--last-move {
+  background: var(--last-move);
+}
+
+.overlay--check {
+  background: var(--check);
+}
+
+.overlay--selected {
+  background: var(--selected);
+}
+
+.marker--dot::after {
+  content: '';
+  position: absolute;
+  left: 36%;
+  top: 36%;
+  width: 28%;
+  height: 28%;
+  border-radius: 50%;
+  background: var(--move-dest);
+}
+
+.marker--ring {
+  background: radial-gradient(transparent 0%, transparent 79%, var(--move-dest) 80%);
+}
+
+.marker--hover {
+  background: var(--drag-hover);
+}
+
+.coord {
+  position: absolute;
+  font-size: var(--coord-size);
+  font-weight: 600;
+  line-height: 1;
+}
+
+.coord--rank {
+  left: 2px;
+  top: 2px;
+}
+
+.coord--file {
+  right: 2px;
+  bottom: 2px;
+}
+
+.coord--on-light {
+  color: var(--sq-dark);
+}
+
+.coord--on-dark {
+  color: var(--sq-light);
+}
+
+.piece {
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+.piece--grab {
+  cursor: grab;
+  pointer-events: auto;
+}
+
+.piece--lifted {
+  opacity: 0.3;
+}
+
+.piece--dragged {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 12.5%;
+  height: 12.5%;
+  will-change: transform;
+}
+
+.picker-dim {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.picker-cell {
+  position: absolute;
+  width: 12.5%;
+  height: 12.5%;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background-color: var(--picker-bg);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+.picker-cell:hover {
+  background-color: var(--picker-hover);
+}
