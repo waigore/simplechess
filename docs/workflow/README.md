@@ -142,6 +142,8 @@ Every `evidence-capture` must state what to capture (e.g. screenshots, console/n
 
 For `design-spec` and `playtest-plan`, Planner is both content reviewer and closer. Treat **accept**, **fanout** (when required as fallback), and **close** as separate steps.
 
+A `playtest-plan` is not proven until it has been run. Content accept does **not** close it: Planner comments the accept and sets `assigned:designer`, and the plan stays open until its epic's `playtest` is complete (see [child-closure gates](#child-closure-gates)). While it waits, the Designer keeps it current as design and architecture land and fixes gaps found while executing it (missing scenarios, ambiguous pass/fail, wrong commands or paths).
+
 ### Downstream fanout gate
 
 **Do not close a task while its required next-stage task is outstanding.** Content quality alone is not enough.
@@ -153,7 +155,7 @@ Outstanding means the next-stage issue has not been created yet (missing issue, 
 | `design-spec` | `architecture-spec` | designer |
 | `architecture-spec` | `implementation` | architect |
 | `implementation` | `playtest` | coder |
-| `playtest-plan` | — (none) | — |
+| `playtest-plan` | — (none; see [child-closure gates](#child-closure-gates)) | — |
 | `playtest` | — (none; see [child-closure gates](#child-closure-gates)) | — |
 | `evidence-capture` | — (none) | — |
 | `defect` | — (none) | — |
@@ -172,6 +174,7 @@ Who enforces the gate:
 | Closing | Gate |
 | --- | --- |
 | `playtest` | All of its sub-issues (`evidence-capture` and `defect`) are **closed**. Designer has accepted playtest results (including that evidence shows the plan was actually exercised). |
+| `playtest-plan` | Planner has content-accepted it, **and** the epic's `playtest` task meets its own gate above (results posted, all `evidence-capture` / `defect` children closed, Designer accepted results). Running the plan is its acceptance gate. Planner closes `playtest` and `playtest-plan` together. |
 | `epic` | All of its sub-issues for the slice are **closed** (first-level tasks). Because playtest cannot close while its children are open, open defects/evidence under playtest also block the epic. |
 
 ### What reviewers check
@@ -200,12 +203,12 @@ If the bar is not met, create or reopen work; do not treat the project as finish
 Labels on the epic: `type:epic`, `owner:planner`, `assigned:planner` (Planner closes when the slice meets evaluation criteria).
 
 1. Planner creates the epic, then **all first-level tasks** as sub-issues: `design-spec`, `playtest-plan`, `architecture-spec`, `implementation`, `playtest` — each with subtype, owner, assigned, and initial AC.
-2. Designer delivers design-spec and playtest-plan. Planner content-reviews and closes each when accepted (architecture-spec already exists from step 1).
+2. Designer delivers design-spec and playtest-plan. Planner content-reviews both. Planner closes design-spec when accepted (architecture-spec already exists from step 1). The accepted playtest-plan stays open with `assigned:designer` until the playtest is complete (step 7).
 3. Architect delivers architecture-spec; Designer reviews; Planner closes when accepted (implementation already exists).
 4. Coder implements; Architect reviews code + tests + coverage/quality. On accept → `assigned:planner`; Planner closes `implementation` (playtest already exists; playtest need not be finished).
 5. Playtester creates `evidence-capture` sub-issues under playtest; Designer reviews list comprehensiveness; Playtester runs scenarios, attaches logs/screenshots, closes evidence-capture when AC met. Failures → `subtype:defect` sub-issues under playtest → `assigned:coder`.
 6. Coder fixes defects → `assigned:playtester`; Playtester verifies against defect AC and **closes** each defect.
-7. Designer reviews playtest results + evidence; on accept → `assigned:planner`. Planner closes `playtest` only when all playtest children are closed. Planner closes the epic when all epic sub-issues are closed and evaluation criteria are met.
+7. Designer reviews playtest results + evidence; on accept → `assigned:planner` on both `playtest` and `playtest-plan`. Planner closes `playtest` only when all playtest children are closed, then closes `playtest-plan` in the same pass. Planner closes the epic when all epic sub-issues are closed and evaluation criteria are met.
 
 ## Role summary
 
