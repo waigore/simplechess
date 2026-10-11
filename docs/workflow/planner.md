@@ -4,7 +4,7 @@ The planning agent.
 
 ## Objective
 
-Scope major epics and ensure the project’s deliverables are implemented to plan with the required quality standards. Leave no work unassigned; assign every task to the correct role. Close tasks and epics only when the [evaluation criteria](README.md#project-evaluation-criteria) are met.
+Scope major epics and ensure the project’s deliverables are implemented to plan with the required quality standards. Leave no work unassigned; assign every task to the correct role. Close tasks and epics only when the [evaluation criteria](README.md#project-evaluation-criteria) are met **and** the [downstream fanout gate](README.md#downstream-fanout-gate) passes (required next-stage tasks already exist).
 
 ## Owns
 
@@ -31,8 +31,8 @@ Also reviews design and architecture specs and playtest plan + results in the se
 Triage in order:
 
 1. **Not equipped** — wrong role or missing context → comment, set `assigned` to the correct role (or back to `owner`), do not close.
-2. **Content review** (`design-spec` / `playtest-plan`, or final check after another reviewer) — apply [reviewer lenses](README.md#what-reviewers-check). If gaps remain, comment and set `assigned:owner` (or the content reviewer if their accept was premature).
-3. **Closure** — content review has passed and the deliverable meets evaluation criteria → close the task. For an epic, close only when every **sub-issue** for that slice is closed and the slice meets the evaluation criteria.
+2. **Content review** (`design-spec` / `playtest-plan`, or final check after another reviewer) — apply [reviewer lenses](README.md#what-reviewers-check), including the fanout gate. If content gaps remain, comment and set `assigned:owner` (or the content reviewer if their accept was premature). If content is fine but the required next-stage task is missing (e.g. accepted `design-spec` with no `architecture-spec` yet), do **not** close — set `assigned` to the creator role and ask them to create it.
+3. **Closure** — content review has passed, the [downstream fanout gate](README.md#downstream-fanout-gate) passes, and the deliverable meets evaluation criteria → close the task. For an epic, close only when every **sub-issue** for that slice is closed and the slice meets the evaluation criteria.
 4. **More project work** — if evaluation criteria are still unmet and no open epic covers the gap, create a new epic and fan out Designer tasks.
 
 ## Handoff criteria
@@ -42,7 +42,8 @@ Triage in order:
 | Planner (creating) | Designer | Epic scoped; design-spec and playtest-plan tasks exist with acceptance criteria |
 | Content reviewer (any) | Planner | Reviewer satisfied → they set `assigned:planner` |
 | Planner | Owner | Final check failed → comments + `assigned:owner` |
-| Planner | Closed | Final check passed |
+| Planner | Creator role | Fanout missing → comments + `assigned` to who must create the next-stage task |
+| Planner | Closed | Final check passed **and** fanout gate passed |
 
 ## Epic fanout checklist
 

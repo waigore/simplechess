@@ -63,10 +63,10 @@ The upstream agent creates the next task(s), writes acceptance criteria, and set
 | Architect | `implementation` | coder |
 | Coder | `playtest` | playtester |
 
-Create the next-stage task only after the prerequisite deliverable’s **content reviewer** is satisfied (usually when `assigned` moves to Planner for closure). Nest every new task under its epic as a [sub-issue](#epics-and-github-sub-issues).
+Create the next-stage task only after the prerequisite deliverable’s **content reviewer** is satisfied, and **before** the prerequisite task is closed (see [Downstream fanout gate](#downstream-fanout-gate)). Nest every new task under its epic as a [sub-issue](#epics-and-github-sub-issues).
 
 - For an epic, Planner creates both Designer tasks up front as sub-issues of the epic.
-- Designer creates `architecture-spec` only after `design-spec` is accepted. `playtest-plan` may proceed in parallel with design work.
+- Designer creates `architecture-spec` only after `design-spec` is accepted, and before that `design-spec` closes. `playtest-plan` may proceed in parallel with design work.
 
 ### Implementation acceptance criteria
 
@@ -95,10 +95,34 @@ Every `implementation` task must require, at minimum:
 2. Owner finishes → set `assigned` to the content reviewer; leave a short note on what to review.
 3. Reviewer is not satisfied → comment with gaps; set `assigned` back to `owner`.
 4. Owner refines → set `assigned` back to the reviewer.
-5. Repeat until the reviewer is satisfied → set `assigned:planner`.
-6. **Only Planner closes** the task (and epics), after a final check against evaluation criteria. If the check fails, Planner comments and sets `assigned` back to `owner`.
+5. Repeat until the reviewer is satisfied (content accept).
+6. **Fanout before closure handoff** — if this subtype must create a next-stage task ([table above](#task-creation-chain)), that task must exist before anyone treats the work as ready to close. The creator role creates it (labels, acceptance criteria, epic sub-issue), then sets `assigned:planner`. If fanout is still missing when the reviewer would hand off, set `assigned` to the creator role with a short “create next-stage task” note — do not send to Planner for close yet.
+7. **Only Planner closes** the task (and epics), after a final check against evaluation criteria **and** the [downstream fanout gate](#downstream-fanout-gate). If either check fails, Planner comments and sets `assigned` back to the role that must act (usually `owner`, or the creator role for missing fanout).
 
-For `design-spec` and `playtest-plan`, Planner is both content reviewer and closer. Treat accept and close as two steps: first accept quality, then close.
+For `design-spec` and `playtest-plan`, Planner is both content reviewer and closer. Treat **accept**, **fanout** (when required), and **close** as separate steps — never collapse accept into close when a next-stage task is still outstanding.
+
+### Downstream fanout gate
+
+**Do not close a task while its required next-stage task is outstanding.** Content quality alone is not enough.
+
+Outstanding means the next-stage issue from the [task creation chain](#task-creation-chain) has not been created yet (missing issue, labels, acceptance criteria, or epic sub-issue link). The next-stage task does **not** need to be finished or closed — it only needs to exist so the pipeline continues.
+
+| Closing this subtype | Required next-stage task (must already exist) | Who creates it |
+| --- | --- | --- |
+| `design-spec` | `architecture-spec` | designer |
+| `architecture-spec` | `implementation` | architect |
+| `implementation` | `playtest` | coder |
+| `playtest-plan` | — (none) | — |
+| `playtest` | — (none) | — |
+| `epic` | all sub-issues for the slice closed | — |
+
+Example: do **not** close a `design-spec` after accepting the written design if the Designer has not yet created the `architecture-spec` task for Architect.
+
+Who enforces the gate:
+
+- **Creator role** — create the next-stage task after content accept and before handing to Planner for close.
+- **Content reviewers** — before setting `assigned:planner`, confirm the required next-stage task exists (or assign the creator to create it).
+- **Planner** — before closing any task, confirm the gate; if fanout is missing, do not close; comment and set `assigned` to the creator role.
 
 ### What reviewers check
 
@@ -107,6 +131,7 @@ Beyond the task’s acceptance criteria (defined by the creator), every reviewer
 1. Does this meet the needs of whoever is **downstream** of it?
 2. Does it meet **overall quality standards** (specs + [AGENTS.md](../../AGENTS.md))?
 3. Does it **move the project toward its goals** / done criteria?
+4. If this subtype creates a next-stage task, does that task **already exist** (fanout gate)? If not, do not hand to Planner for close.
 
 ## Project evaluation criteria
 
@@ -124,10 +149,10 @@ If the bar is not met, create or reopen work; do not treat the project as finish
 Labels on the epic: `type:epic`, `owner:planner`, `assigned:planner` (Planner closes when the slice meets evaluation criteria).
 
 1. Planner creates the epic issue, then **Design: board / setup / mouse / move list** (`subtype:design-spec`) and **Playtest plan: untimed** (`subtype:playtest-plan`) as **sub-issues** of the epic → `owner:designer`, `assigned:designer`.
-2. Designer delivers each; Planner reviews and closes. After `design-spec` is accepted, Designer creates **Architecture: rules + UI state** (`subtype:architecture-spec`) as a sub-issue of the same epic → `owner:architect`, `assigned:architect`.
-3. Designer reviews architecture; on accept → `assigned:planner`; Planner closes. Architect creates **Implementation: untimed game** (`subtype:implementation`, AC includes unit tests, ≥80% coverage, code quality) as a sub-issue of the epic → `owner:coder`, `assigned:coder`.
-4. Architect reviews implementation; on accept → `assigned:planner`; Planner closes. Coder creates **Playtest: untimed** (`subtype:playtest`) as a sub-issue of the epic → `owner:playtester`, `assigned:playtester`.
-5. Designer reviews playtest results; on accept → `assigned:planner`; Planner closes. Planner closes the epic when its sub-issues for that slice are closed and evaluation criteria are met.
+2. Designer delivers each. Planner content-reviews. For `playtest-plan` (no fanout), Planner may close after accept. For `design-spec`, after accept Designer creates **Architecture: rules + UI state** (`subtype:architecture-spec`) as a sub-issue → `owner:architect`, `assigned:architect`; **only then** Planner closes the `design-spec`.
+3. Designer reviews architecture; on accept → Architect creates **Implementation: untimed game** (`subtype:implementation`, AC includes unit tests, ≥80% coverage, code quality) as a sub-issue → `owner:coder`, `assigned:coder`; then `assigned:planner`; Planner closes the `architecture-spec` only after that implementation task exists.
+4. Architect reviews implementation; on accept → Coder creates **Playtest: untimed** (`subtype:playtest`) as a sub-issue → `owner:playtester`, `assigned:playtester`; then `assigned:planner`; Planner closes the `implementation` only after that playtest task exists.
+5. Designer reviews playtest results; on accept → `assigned:planner`; Planner closes (no further fanout). Planner closes the epic when its sub-issues for that slice are closed and evaluation criteria are met.
 
 ## Role summary
 

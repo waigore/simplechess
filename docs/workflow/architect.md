@@ -12,11 +12,11 @@ Provide architecture specs and ensure they are implemented to plan with the requ
 
 ## Creates / hands off
 
-After `architecture-spec` is accepted by Designer (content review satisfied), create for Coder:
+After `architecture-spec` is accepted by Designer (content review satisfied), create for Coder **before** that `architecture-spec` can close:
 
 - `subtype:implementation` — `owner:coder`, `assigned:coder`
 
-Add the new issue as a **sub-issue of the parent epic**. See [Epics and GitHub sub-issues](README.md#epics-and-github-sub-issues).
+Add the new issue as a **sub-issue of the parent epic**. See [Epics and GitHub sub-issues](README.md#epics-and-github-sub-issues). Then set the `architecture-spec` to `assigned:planner` for closure. Planner must not close `architecture-spec` until this `implementation` exists ([downstream fanout gate](README.md#downstream-fanout-gate)).
 
 Acceptance criteria **must** include:
 
@@ -29,19 +29,19 @@ Acceptance criteria **must** include:
 
 - `implementation` (content reviewer) — code **and** unit tests / coverage / quality
 
-When satisfied, set `assigned:planner`. When not, comment and set `assigned:owner` (`coder`).
+When satisfied on content: ensure Coder has created the `playtest` task (or set `assigned:coder` to create it) before setting `assigned:planner`. When not, comment and set `assigned:owner` (`coder`).
 
-Apply the [reviewer lenses](README.md#what-reviewers-check).
+Apply the [reviewer lenses](README.md#what-reviewers-check), including the fanout gate.
 
 ## When `assigned:architect`
 
 Triage in order:
 
 1. **Not equipped** — pure visual playtest execution, epic scoping, etc. → reassign to the correct role.
-2. **Produce architecture-spec** — modules, state, rules authority, UI composition, persistence/engine seams as in scope. Align with design and [spec/03-platform.md](../../spec/03-platform.md). When done → `assigned:designer`.
+2. **Produce architecture-spec** — modules, state, rules authority, UI composition, persistence/engine seams as in scope. Align with design and [spec/03-platform.md](../../spec/03-platform.md). When done → `assigned:designer` for content review.
 3. **Revise after Designer review** — address comments; re-assign to Designer.
-4. **Review implementation** — verify acceptance criteria, coverage ≥ 80%, test quality, and architectural fit. Loop or pass to Planner.
-5. **Create implementation task** — only after architecture-spec content review is satisfied.
+4. **Create implementation task** — after architecture-spec content review is satisfied and **before** that architecture-spec closes; then return architecture-spec to `assigned:planner`.
+5. **Review implementation** — verify acceptance criteria, coverage ≥ 80%, test quality, and architectural fit; on accept, ensure `playtest` exists (Coder creates it) before `assigned:planner`.
 
 ## Handoff criteria
 
@@ -49,8 +49,9 @@ Triage in order:
 | --- | --- | --- |
 | Architect (producing) | Designer | architecture-spec ready for content review |
 | Architect (reviewing) | Coder | implementation needs rework → `assigned:coder` |
-| Architect (reviewing) | Planner | implementation accepted → `assigned:planner` |
-| Architect (creating) | Coder | implementation task created with full acceptance criteria |
+| Architect (reviewing) | Coder (fanout) | implementation accepted but playtest task missing → `assigned:coder` to create it |
+| Architect (reviewing) | Planner | implementation accepted and fanout gate passed → `assigned:planner` |
+| Architect (creating) | Coder | implementation task created with full acceptance criteria; architecture-spec then → Planner for close |
 
 ## Deliverable expectations
 

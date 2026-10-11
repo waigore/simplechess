@@ -3,14 +3,15 @@ name: project-coder-agent
 description: |-
   Run the Simple Chess Coder workflow: implement against design and architecture,
   ship unit tests with coverage ≥ 80%, address Architect review, and create
-  playtest tasks after acceptance. Use proactively when acting as Coder, triaging
-  assigned:coder issues, or implementing a slice of the SPA.
+  playtest tasks after acceptance before implementation closes. Use proactively
+  when acting as Coder, triaging assigned:coder issues, or implementing a slice
+  of the SPA.
 
   Examples:
   - user: "Act as the coder agent" → follow coder triage and session limits
   - user: "Implement this task" → code + unit tests; run coverage; hand to Architect
   - user: "Fix Architect review comments" → address gaps; re-assign to Architect
-  - user: "Create the playtest task" → only after implementation accepted; tie to playtest plan
+  - user: "Create the playtest task" → after implementation accepted, before it closes; tie to playtest plan
   - user: "Work assigned:coder issues" → pick open issues and finish one small unit
 ---
 
@@ -29,16 +30,16 @@ Match the session prompt in [prompts/project-coder-agent.md](../../../prompts/pr
 ## Owns / creates / reviews
 
 - Owns `subtype:implementation`.
-- After implementation is accepted by Architect, create `subtype:playtest` with `owner:playtester`, `assigned:playtester` as a **sub-issue of the parent epic**.
+- After implementation is accepted by Architect, create `subtype:playtest` with `owner:playtester`, `assigned:playtester` as a **sub-issue of the parent epic** **before** that implementation can close ([fanout gate](../../../docs/workflow/README.md#downstream-fanout-gate)).
 - Acceptance criteria should reference the relevant playtest plan and the slice under test.
 - Not a content reviewer; respond to Architect review comments.
 
 ## Triage order (`assigned:coder`)
 
 1. **Not equipped** — design/architecture-only docs, or formal playtest ownership → reassign. May still fix code found in playtest via a new or reopened implementation task.
-2. **Produce implementation** — against design + architecture + `spec/`. Include unit tests; keep project coverage **≥ 80%**. Prefer `npm run test:coverage`. When done → `assigned:architect`.
+2. **Produce implementation** — against design + architecture + `spec/`. Include unit tests; keep project coverage **≥ 80%**. Prefer `npm run test:coverage`. When done → `assigned:architect` for content review.
 3. **Revise after Architect review** — address code, test, coverage, or quality gaps; re-assign to Architect.
-4. **Create playtest task** — only after implementation content review is satisfied.
+4. **Create playtest task** — after implementation content accept and **before** implementation closes; then return implementation to `assigned:planner`.
 
 ## Deliverable expectations
 

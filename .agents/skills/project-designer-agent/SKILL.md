@@ -2,16 +2,17 @@
 name: project-designer-agent
 description: |-
   Run the Simple Chess Designer workflow: write design-spec and playtest-plan
-  deliverables, create architecture-spec tasks after design acceptance, and
-  content-review architecture and playtest results. Use proactively when acting
-  as Designer, triaging assigned:designer issues, or shaping UI/interaction and
-  playtest scenarios.
+  deliverables, create architecture-spec tasks after design acceptance (before
+  design-spec closes), and content-review architecture and playtest results.
+  Use proactively when acting as Designer, triaging assigned:designer issues,
+  or shaping UI/interaction and playtest scenarios.
 
   Examples:
   - user: "Act as the designer agent" → follow designer triage and session limits
   - user: "Write the design-spec for this epic" → deliver against epic + gameplay/presentation specs
   - user: "Draft the playtest plan" → scenarios with pass/fail, wide and narrow as needed
-  - user: "Review this architecture-spec" → check fit for implementation; loop or pass to Planner
+  - user: "Design-spec was accepted" → create architecture-spec sub-issue before Planner closes design-spec
+  - user: "Review this architecture-spec" → check fit; ensure implementation task exists before Planner
   - user: "Review playtest results" → compare to plan and quality bar; accept or send back
 ---
 
@@ -30,19 +31,19 @@ Match the session prompt in [prompts/project-designer-agent.md](../../../prompts
 ## Owns / creates / reviews
 
 - Owns `subtype:design-spec` and `subtype:playtest-plan`.
-- After `design-spec` is accepted by Planner, create `subtype:architecture-spec` with `owner:architect`, `assigned:architect` as a **sub-issue of the parent epic**.
+- After `design-spec` is accepted by Planner, create `subtype:architecture-spec` with `owner:architect`, `assigned:architect` as a **sub-issue of the parent epic** **before** that design-spec can close ([fanout gate](../../../docs/workflow/README.md#downstream-fanout-gate)).
 - Content-reviews `architecture-spec` and `playtest` results.
-- When satisfied → `assigned:planner`. When not → comment and set `assigned:owner`.
+- When content satisfied: for `architecture-spec`, ensure `implementation` exists (or `assigned:architect` to create it) before `assigned:planner`. For `playtest` → `assigned:planner`. When not → comment and set `assigned:owner`.
 
 ## Triage order (`assigned:designer`)
 
 1. **Wrong subtype / not equipped** — e.g. implementation → comment and set `assigned` to the correct role; do not invent ownership.
-2. **Produce design-spec** — against epic + `spec/` (gameplay and presentation). Cover layout, interaction, states, and motion as needed. When done → `assigned:planner`.
+2. **Produce design-spec** — against epic + `spec/` (gameplay and presentation). Cover layout, interaction, states, and motion as needed. When done → `assigned:planner` for content review.
 3. **Produce playtest-plan** — scenarios, pass/fail criteria, wide and narrow where relevant. When done → `assigned:planner`.
 4. **Revise after review** — address comments; re-assign to the reviewer when ready.
-5. **Review architecture-spec** — fitness for implementation and alignment with design; loop or pass to Planner.
-6. **Review playtest** — results against plan and quality bar; loop or pass to Planner.
-7. **Create architecture-spec task** — only after design-spec content review is satisfied.
+5. **Create architecture-spec task** — after design-spec content accept and **before** design-spec closes; then return design-spec to `assigned:planner`.
+6. **Review architecture-spec** — fitness for implementation and alignment with design; on accept, ensure `implementation` exists before `assigned:planner`.
+7. **Review playtest** — results against plan and quality bar; loop or pass to Planner.
 
 ## Deliverable expectations
 
