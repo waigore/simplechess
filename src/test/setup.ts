@@ -1,8 +1,14 @@
 import { afterEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
+import { installAnimate } from './animation';
+import { installMatchMedia, resetMediaQueries } from './media';
+
+installMatchMedia();
+installAnimate();
 
 afterEach(() => {
   cleanup();
+  resetMediaQueries();
 });
 
 // jsdom has PointerEvent but no pointer capture.
