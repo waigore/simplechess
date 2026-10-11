@@ -18,7 +18,7 @@ npm run build
 npm run preview        # serves the production build (Vite default: http://localhost:4173)
 ```
 
-If the project's README or `package.json` names a different command for serving the production build, use that and note it in the results. Never test against the dev server (`npm run dev`). Record the commit SHA in the results.
+These are the scripts fixed by the [architecture](../architecture/epic-a-untimed.md) §1 (`build` = `tsc -b && vite build`, `preview` = `vite preview`). If `package.json` on the commit under test differs, use what it names and note it in the results. Never test against the dev server (`npm run dev`). Record the commit SHA in the results.
 
 Also run `npm run test:coverage` once and record the overall line coverage. It must be ≥ 80% and the command must exit 0 (see E-05a for the fifty-move rule test).
 
@@ -48,7 +48,7 @@ Turn this on only for MO-08, and off for every other scenario:
 
 ### Evidence
 
-Save screenshots as `{scenarioId}-{W|N}.png` (for example `LK-03-N.png`) and attach them to the playtest task. Motion scenarios need a screen recording or a DevTools Performance recording with screenshots enabled. A scenario with no evidence where evidence is asked for counts as **blocked**, not pass.
+Save screenshots as `{scenarioId}-{W|N}.png` (for example `LK-03-N.png`) and attach them to the `evidence-capture` sub-issue of the playtest task ([#16](https://github.com/waigore/simplechess/issues/16)) that covers that scenario. Post the results table itself on #16. Motion scenarios need a screen recording or a DevTools Performance recording with screenshots enabled. A scenario with no evidence where evidence is asked for counts as **blocked**, not pass.
 
 ## 2. Conventions
 
@@ -85,6 +85,7 @@ The **Run on** column says which viewports to run. Scenarios marked **W+N** are 
 | SET-12 | W | SET-10 confirm step showing | Press **Abandon and start**. | New game: start position, `No moves yet`, no last-move highlight, `Alice (White) to move`. |
 | SET-13 | W | Custom names; play `1. e4`; open New game | Press **Cancel**. | The game is unchanged: `1. e4` in the move list, last-move highlight on e2 and e4, `Bob (Black) to move`. |
 | SET-14 | W | A finished game (for example after E-01) | New game → Start game. | It starts immediately with **no** confirm step. |
+| SET-15 | W | Default names; no move played | Press **New game**. Then Cancel, start a fresh game with White `White` typed in and Black `Bob`, and press **New game** again. | First time: both name fields are empty with placeholders "White" and "Black" showing. Second time: the White field is empty (placeholder showing) and the Black field reads `Bob`. |
 
 ### 3.2 Turn indicator and orientation (TURN)
 
@@ -117,6 +118,9 @@ Default names + Fixed, fresh game, unless stated.
 | M-14 | W | Start position | Click an empty square (e4). | Nothing happens. |
 | M-15 | W+N | Play `1. e4 d5` | Click the e4 pawn. | A dot shows on e5 and a ring around the edge of d5. The Black pawn on d5 stays fully visible inside the ring. |
 | M-16 | W | M-15 | Click d5. | The capture is played. Move list `2. exd5`. Only one pawn is on d5. |
+| M-17 | W+N | Start position | Click e2 (it is now selected). Press on e2 again and, without releasing, drag the pawn to e4, then release. | The second press starts a drag: the pawn follows the pointer with the 30% ghost on e2. On release it sits on e4 at once (no slide). Move list `1. e4`. |
+| M-18 | W | Start position | Click e2. Then press the mouse button on e4 and **hold it down** for a second before releasing. | The move is played on the press, not the release: while the button is still held, the pawn has already moved to e4, the move list shows `1. e4`, and the status reads `Black to move`. Releasing changes nothing. |
+| M-19 | W | Start position | Click e2. Then switch to another window (Alt+Tab / Cmd+Tab) and back. | The e2 pawn is no longer selected and no markers show. Nothing is recorded. |
 
 ### 3.4 Rules (RULE)
 
@@ -150,6 +154,7 @@ Default names + Fixed, fresh game for each row.
 | P-07 | W+N | Default names, **Fixed**, Black prefix | Click b2, then a1. Choose **Queen**. | The picker is in the a-file running upward from a1: a1 Queen, a2 Knight, a3 Rook, a4 Bishop, in Black. Result `5... bxa1=Q`. |
 | P-08 | W+N | Default names, **Flip**, Black prefix | Click b2, then a1. Choose **Knight**. | Black is at the bottom, so a1 is at the top of the board and the picker runs downward from it (a1 Queen first). It stays inside the board. Result `5... bxa1=N`. After the choice, the board flips to White at the bottom. |
 | P-09 | W | P-01 picker open | Press Tab four times, then Enter. | Focus starts on Queen, and Tab cycles through the four cells with a visible focus outline. Enter promotes to the focused piece. |
+| P-10 | W | Fresh game, White prefix | Click b7. Press on a8 and release without moving the mouse (the Queen cell opens under the pointer). Then **drag** b7 to a8 in a new fresh game and release without moving further. | Both times the picker opens and **stays open** with no piece chosen: the move list still ends at `4... Nc6`. Only a separate click on a cell promotes. |
 
 ### 3.5 Endings (END)
 
@@ -216,7 +221,7 @@ Take every screenshot at both **W** and **N**, at full page size.
 | LK-06 | W+N | Select a White piece that has a capture available (M-15 position) | Selection and markers. | The selection overlay, dots, and capture ring use the same dark-green tone and fit the board palette. |
 | LK-07 | W+N | All of the above | Overall review. | Every piece of both colors is readable on both square colors. Pieces are the cburnett set with no shadows. Board, pieces, sidebar, buttons, and dialogs read as one product with the same palette and type. Text is not clipped and no horizontal scrollbar appears. |
 | LK-08 | W | Resize the window from 1440 wide down to 860, then 859, then back. | Breakpoint. | At 860 wide the layout is still side by side (board 488px at 900 tall). At 859 it is stacked. The switch is immediate with no animation. The move list, board position, and status are unchanged. |
-| LK-09 | W | Check `src/assets/pieces/` (or wherever the piece set is stored). | Piece license. | A LICENSE file for the cburnett set sits next to the piece assets, separate from app code. |
+| LK-09 | W | Check `src/assets/pieces/cburnett/` (architecture §8). | Piece license. | A LICENSE file for the cburnett set sits next to the piece assets, separate from app code. |
 
 ### 3.9 Accessibility basics (A11Y)
 
@@ -265,4 +270,4 @@ For each fail: scenario ID, viewport, steps to reproduce, expected (quote this p
 Feel of moves (snappy? any lag?), visual cohesion, anything the plan didn't cover but a player would notice.
 ```
 
-A slice passes when every scenario is **pass**, except E-05b, which may be **blocked** if E-05a passes. Any **fail** is reported on the playtest task, with the fix routed to the implementation owner.
+A slice passes when every scenario is **pass**, except E-05b, which may be **blocked** if E-05a passes. Each **fail** becomes a `subtype:defect` sub-issue of the playtest task ([#16](https://github.com/waigore/simplechess/issues/16)), assigned to the Coder, with steps to reproduce, expected vs actual, and what "fixed" means. The original `implementation` task is not reopened.
