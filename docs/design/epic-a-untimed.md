@@ -61,7 +61,7 @@ The upper nameplate always belongs to the color shown at the top of the board; t
 ### When setup appears
 
 - **Initial load**: the setup dialog opens over the start position. There is no saved game in this slice, so every load starts here. The dialog has no Cancel; Escape does nothing.
-- **"New game" button**: opens the same dialog, pre-filled with the current game's names and orientation. It has **Cancel** (and Escape) which closes the dialog and leaves the current game exactly as it was.
+- **"New game" button**: opens the same dialog, pre-filled with the current game's names and orientation. A name equal to its color default ("White" for White, "Black" for Black) pre-fills as an empty field so the placeholder shows; starting with it blank gives the same name. It has **Cancel** (and Escape) which closes the dialog and leaves the current game exactly as it was.
 
 ### Dialog
 
@@ -181,7 +181,7 @@ The action row sits under the status. Buttons are 36px high, 14px text, full-wid
 ### Draw offer
 
 1. Side to move presses **Offer draw**. Allowed any time the game is in progress, except right after that same side's offer was declined in the current turn (button disabled until they move).
-2. The action row is replaced by the offer panel: **Accept draw** (primary) and **Decline** (secondary). The status shows `{offerer} offers a draw` / `{opponent}, accept or decline`.
+2. The action row is replaced by the offer panel: **Accept draw** (primary) and **Decline** (secondary). The status shows `{label(offerer)} offers a draw` / `{label(opponent)}, accept or decline`.
 3. While an offer is pending, the board is locked: no piece can be picked up, selected, or moved, and an existing selection is cleared. So a move can never be played while an offer is pending; the opponent must accept or decline first.
 4. **Accept draw**: game ends, `Draw` / `by agreement`.
 5. **Decline**: panel closes, the action row returns, the same side is still to move. Secondary status shows `Draw offer declined` until the next move. **Offer draw** is disabled until that side has moved.
@@ -200,13 +200,13 @@ Only pieces of the side to move are interactive, and only while the game is in p
 | 1 | **Idle**, pointer down on own piece | Piece becomes **selected**: origin square gets the selection highlight, legal-destination markers appear in the same frame. |
 | 2 | Selected (pointer still down), pointer moves > 4px | **Dragging**: piece lifts out of the square and its center follows the pointer exactly, every frame, with no easing. The origin square keeps the selection highlight and shows the piece as a ghost at 30% opacity. A legal square under the pointer gets the drag-hover tint. |
 | 3 | Selected (pointer still down), pointer up without moving > 4px | Stays **selected** (click mode). |
-| 4 | Selected, click a legal destination | Move commits with the committed-move animation (§9). |
-| 5 | Selected, click the same piece | Deselect. Markers disappear. |
-| 6 | Selected, click another own piece | That piece becomes selected instead (same as row 1, including starting a drag if the pointer moves). |
-| 7 | Selected, click an illegal square (empty or an opponent piece that isn't a legal capture), or outside the board, or press Escape | Deselect. No move. |
-| 8 | Dragging, release on a legal destination | Move commits. The piece snaps to the destination square center with no tween (it is already under the pointer); other pieces involved (captured piece, castling rook, en passant pawn) animate per §9. |
+| 4 | Selected, pointer down on a legal destination | Move commits **on pointer down**, not on release, with the committed-move animation (§10). The following pointer up does nothing. |
+| 5 | Selected, pointer down on the same piece | Pressed again, as in row 1. If the pointer moves > 4px before release, it drags (row 2). If it is released without moving > 4px, deselect: markers disappear. |
+| 6 | Selected, pointer down on another own piece | That piece becomes selected instead (same as row 1, including starting a drag if the pointer moves). |
+| 7 | Selected, pointer down on an illegal square (empty or an opponent piece that isn't a legal capture) or outside the board, Escape, or the window loses focus | Deselect. No move. |
+| 8 | Dragging, release on a legal destination | Move commits. The piece snaps to the destination square center with no tween (it is already under the pointer); other pieces involved (captured piece, castling rook, en passant pawn) animate per §10. |
 | 9 | Dragging, release on the origin square | Piece is put back instantly and **stays selected**, so the player can finish with a click. |
-| 10 | Dragging, release on an illegal square or off the board | Piece returns to its origin with the put-back animation (§9). Deselect. Nothing is recorded. |
+| 10 | Dragging, release on an illegal square or off the board | Piece returns to its origin with the put-back animation (§10). Deselect. Nothing is recorded. |
 | 11 | Dragging, Escape, pointer cancel, or the window loses focus | Same as row 10. |
 | 12 | Idle, pointer down on an opponent piece | Nothing: no selection, no markers, no drag. |
 | 13 | Idle, pointer down on an empty square | Nothing. |
@@ -231,8 +231,8 @@ When a pawn's move to the last rank is legal (by click or by drop):
 1. The pawn is shown on the promotion square (normal move animation for click; already there for drag). Any piece it captures is removed. The move is **not** committed yet: the move list, status, and orientation don't change.
 2. The rest of the board dims with an overlay `rgba(0, 0, 0, 0.45)`.
 3. A picker appears in the promotion square's file: four square cells, each the size of a board square, starting on the promotion square and running toward the center of the board. Order from the promotion square inward: **Queen, Knight, Rook, Bishop**, in the mover's color. Cells use `--picker-bg` with a 50% radius; hovered cell uses `--picker-hover`. It is always inside the board, so it fits on narrow too.
-4. Clicking a cell commits the move with that piece. The pawn is replaced by the chosen piece instantly, then the move is recorded and play continues (including the orientation flip).
-5. **Cancel**: clicking anywhere outside the four cells (on the dimmed board or elsewhere) or pressing Escape cancels. The pawn goes back to its origin with the put-back animation, any captured piece reappears, nothing is recorded, and it is still the same side to move with no selection.
+4. Clicking a cell commits the move with that piece. The pawn is replaced by the chosen piece instantly, then the move is recorded and play continues (including the orientation flip). The Queen cell opens under the pointer, so the press or release that opened the picker never chooses a cell; only a new click does.
+5. **Cancel**: clicking anywhere outside the four cells (on the dimmed board or elsewhere), pressing Escape, or the window losing focus cancels. The pawn goes back to its origin with the put-back animation, any captured piece reappears, nothing is recorded, and it is still the same side to move with no selection.
 6. The cells are buttons with accessible names ("Promote to queen", etc.). Focus moves to Queen when the picker opens; Tab cycles the four cells; Enter selects.
 
 ## 8. Move list
@@ -323,7 +323,7 @@ Always shown, inside the board:
 Rules:
 
 - Moves settle at once: no bounce, no overshoot.
-- Input is never blocked by an animation. If the next pointer down happens while a move is still animating, the animation jumps to its end state first.
+- Input is never blocked by an animation. If the next pointer down happens while a move is still animating, the animation jumps to its end state first. The press applies to the square the player saw when pressing; a pending side-to-move flip happens right after.
 - Dragging is direct manipulation, not an animation: the piece follows the pointer every frame with no smoothing, even under reduced motion.
 - **Reduced motion** (`prefers-reduced-motion: reduce`): every tween above becomes 0ms. Committed moves, captures, castling, en passant, and put-back show the end position at once. Dragging still tracks the pointer.
 
