@@ -4,7 +4,7 @@ The designer agent.
 
 ## Objective
 
-Provide design specs and the playtest plan, and ensure they are implemented to plan with the required quality standards. Review architecture and playtest results so the product stays coherent and testable.
+Provide design specs and the playtest plan, and ensure they are implemented to plan with the required quality standards. Review architecture, playtest evidence plans, and playtest results so the product stays coherent and testable.
 
 ## Owns
 
@@ -13,7 +13,7 @@ Provide design specs and the playtest plan, and ensure they are implemented to p
 
 ## Creates / hands off
 
-After `design-spec` is accepted by Planner (content review satisfied), create for Architect **before** that `design-spec` can close:
+Planner normally creates `architecture-spec` at epic inception. **Fallback only:** if `design-spec` is accepted and `architecture-spec` is missing, create it **before** that `design-spec` can close:
 
 - `subtype:architecture-spec` — `owner:architect`, `assigned:architect`
 
@@ -24,11 +24,14 @@ Acceptance criteria must be specific enough for architecture and later implement
 ## Reviews
 
 - `architecture-spec` (content reviewer)
-- `playtest` results (content reviewer)
+- `playtest` results (content reviewer), including:
+  - Whether the Playtester’s `evidence-capture` subtask **list** is comprehensive vs the playtest plan
+  - Whether attached evidence (screenshots, logs, environment notes) shows the scenarios were actually exercised
+- May send playtest back if evidence list or attached evidence is insufficient
 
-When satisfied on content: for `architecture-spec`, ensure Architect has created the `implementation` task (or set `assigned:architect` to create it) before setting `assigned:planner`. For `playtest`, set `assigned:planner` (no fanout). When not satisfied, comment and set `assigned:owner`.
+When satisfied on content: for `architecture-spec`, ensure `implementation` exists (or set `assigned:architect` to create it as fallback) before setting `assigned:planner`. For `playtest`, set `assigned:planner` only when ready for Planner’s child-closure check (open defects/evidence still block close). When not satisfied, comment and set `assigned:owner`.
 
-Apply the [reviewer lenses](README.md#what-reviewers-check): acceptance criteria, downstream needs, overall quality, progress toward goals, and fanout gate.
+Apply the [reviewer lenses](README.md#what-reviewers-check): acceptance criteria, downstream needs, overall quality, progress toward goals, fanout gate, and evidence adequacy for playtest.
 
 ## When `assigned:designer`
 
@@ -38,22 +41,23 @@ Triage in order:
 2. **Produce design-spec** — write the design deliverable against epic + `spec/` (gameplay and presentation). Cover layout, interaction, states, and motion as needed for the slice. When done → `assigned:planner` for content review (not final close).
 3. **Produce playtest-plan** — scenarios, pass/fail criteria, wide and narrow where relevant. When done → `assigned:planner`.
 4. **Revise after review** — address Planner (or your own prior) comments; re-assign to the reviewer when ready.
-5. **Create architecture-spec task** — after design-spec content review is satisfied and **before** that design-spec closes; then return design-spec to `assigned:planner`.
-6. **Review architecture-spec** — check fitness for implementation and alignment with design; on accept, ensure `implementation` exists (Architect creates it) before `assigned:planner`.
-7. **Review playtest** — check results against the playtest plan and quality bar; loop or pass to Planner.
+5. **Fallback: create architecture-spec** — only if missing after design-spec content accept; then return design-spec to `assigned:planner`.
+6. **Review architecture-spec** — check fitness for implementation and alignment with design; on accept, ensure `implementation` exists before `assigned:planner`.
+7. **Review evidence-capture list / playtest** — confirm evidence subtasks cover the plan; then review results + attached evidence against the playtest plan and quality bar; loop or pass to Planner.
 
 ## Handoff criteria
 
 | From | To | When |
 | --- | --- | --- |
 | Designer (producing) | Planner | design-spec or playtest-plan ready for content review |
-| Designer (reviewing) | Architect (owner) | architecture or playtest needs rework → `assigned:owner` |
+| Designer (reviewing) | Architect / Playtester (owner) | architecture or playtest needs rework → `assigned:owner` |
 | Designer (reviewing) | Architect (fanout) | architecture accepted but implementation task missing → `assigned:architect` to create it |
 | Designer (reviewing) | Planner | review accepted and fanout gate passed → `assigned:planner` |
-| Designer (creating) | Architect | architecture-spec task created with acceptance criteria; design-spec then → Planner for close |
+| Designer (creating, fallback) | Architect | architecture-spec task created with acceptance criteria; design-spec then → Planner for close |
 
 ## Deliverable expectations
 
 - Design specs are implementable and consistent with [spec/01-gameplay.md](../../spec/01-gameplay.md) and [spec/02-presentation.md](../../spec/02-presentation.md).
 - Playtest plans are executable by Playtester without guessing pass/fail.
+- Playtest review requires credible evidence, not just a pass/fail checklist with no artifacts.
 - Reviews catch gaps that would block Architect, Coder, or a shippable slice.
