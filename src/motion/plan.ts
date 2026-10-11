@@ -22,6 +22,12 @@ export function planCommit(m: MoveDetail, via: CommitVia, reduced: boolean): Twe
   return tweens;
 }
 
+/** The pawn moving onto the promotion square before a piece is chosen; a drop is already there. */
+export function planPreview(from: Square, to: Square, via: 'click' | 'drag', reduced: boolean): Tween[] {
+  if (reduced || via === 'drag') return [];
+  return [{ kind: 'slide', square: to, from, duration: COMMIT_MS }];
+}
+
 /** `start` is the drop point, the promotion square for a cancelled promotion, or null for a drop on the origin. */
 export function planPutBack(from: Square, start: Square | Point | null, reduced: boolean): Tween[] {
   if (reduced || start === null) return [];

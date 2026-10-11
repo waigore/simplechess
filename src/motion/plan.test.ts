@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { MoveDetail } from '../rules/types';
 import { COMMIT_MS, PUT_BACK_MS } from './constants';
-import { planCommit, planPutBack, slideOffset } from './plan';
+import { planCommit, planPreview, planPutBack, slideOffset } from './plan';
 import type { BoardFrame } from './plan';
 
 const QUIET: MoveDetail = { color: 'w', from: 'e2', to: 'e4', piece: 'p', san: 'e4' };
@@ -111,6 +111,19 @@ describe('planPutBack', () => {
   it('reduced motion drops the tween', () => {
     expect(planPutBack('g1', { x: 300, y: 120 }, true)).toEqual([]);
     expect(planPutBack('b7', 'a8', true)).toEqual([]);
+  });
+});
+
+describe('planPreview', () => {
+  it('slides the pawn onto the promotion square for a click', () => {
+    expect(planPreview('b7', 'a8', 'click', false)).toEqual([
+      { kind: 'slide', square: 'a8', from: 'b7', duration: COMMIT_MS },
+    ]);
+  });
+
+  it('has nothing to animate for a drop or under reduced motion', () => {
+    expect(planPreview('b7', 'a8', 'drag', false)).toEqual([]);
+    expect(planPreview('b7', 'a8', 'click', true)).toEqual([]);
   });
 });
 
