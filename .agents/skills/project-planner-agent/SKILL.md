@@ -43,7 +43,7 @@ Match the session prompt in [prompts/project-planner-agent.md](../../../prompts/
 
 1. **Not equipped** — wrong role or missing context → comment, set `assigned` to the correct role (or back to `owner`); do not close.
 2. **Content review** — apply [reviewer lenses](../../../docs/workflow/README.md#what-reviewers-check), including fanout. Content gaps → comment and set `assigned:owner`. Content OK but next-stage task missing → do **not** close; set `assigned` to the creator role (fallback).
-3. **Closure** — content review passed, fanout gate passed, child-closure gates passed (`playtest` / epic), deliverable meets evaluation criteria → close. For an epic, close only when every sub-issue for that slice is closed and the slice meets evaluation criteria.
+3. **Closure** — content review passed, fanout gate passed, child-closure gates passed (`playtest` / `playtest-plan` / epic), deliverable meets evaluation criteria → close. An accepted `playtest-plan` stays open (`assigned:designer`) until its `playtest` is complete; close both together. For an epic, close only when every sub-issue for that slice is closed and the slice meets evaluation criteria.
 4. **More project work** — if evaluation criteria remain unmet and no open epic covers the gap, create a new epic and fan out all first-level tasks.
 
 ## Epic fanout checklist
@@ -59,5 +59,5 @@ Match the session prompt in [prompts/project-planner-agent.md](../../../prompts/
 Before closing, confirm:
 
 1. [Downstream fanout gate](../../../docs/workflow/README.md#downstream-fanout-gate) — required next-stage task exists (usually from inception fanout; create via fallback role if missing).
-2. [Child-closure gates](../../../docs/workflow/README.md#child-closure-gates) — `playtest` has no open `defect` / `evidence-capture` children; epic has all sub-issues closed.
+2. [Child-closure gates](../../../docs/workflow/README.md#child-closure-gates) — `playtest` has no open `defect` / `evidence-capture` children; `playtest-plan` closes only once its `playtest` is complete (running the plan is its acceptance gate); epic has all sub-issues closed.
 3. [Evaluation criteria](../../../docs/workflow/README.md#project-evaluation-criteria) and [AGENTS.md](../../../AGENTS.md).

@@ -39,11 +39,11 @@ Match the session prompt in [prompts/project-designer-agent.md](../../../prompts
 
 1. **Wrong subtype / not equipped** — e.g. implementation → comment and set `assigned` to the correct role; do not invent ownership.
 2. **Produce design-spec** — against epic + `spec/` (gameplay and presentation). Cover layout, interaction, states, and motion as needed. When done → `assigned:planner` for content review.
-3. **Produce playtest-plan** — scenarios, pass/fail criteria, wide and narrow where relevant. When done → `assigned:planner`.
+3. **Produce playtest-plan** — scenarios, pass/fail criteria, wide and narrow where relevant. When done → `assigned:planner`. After accept it returns `assigned:designer` and stays open until the playtest is complete; act only when design/architecture changes or execution exposes gaps.
 4. **Revise after review** — address comments; re-assign to the reviewer when ready.
 5. **Fallback: create architecture-spec** — only if missing after design-spec content accept; then return design-spec to `assigned:planner`.
 6. **Review architecture-spec** — fitness for implementation and alignment with design; on accept, ensure `implementation` exists before `assigned:planner`.
-7. **Review evidence / playtest** — evidence-capture list vs plan; results + artifacts vs plan and quality bar; loop or pass to Planner.
+7. **Review evidence / playtest** — evidence-capture list vs plan; results + artifacts vs plan and quality bar; loop or pass to Planner. Fix plan gaps exposed by execution first; on accept set `assigned:planner` on both `playtest` and `playtest-plan`.
 
 ## Deliverable expectations
 
@@ -51,4 +51,4 @@ Match the session prompt in [prompts/project-designer-agent.md](../../../prompts
 - Playtest plans are executable by Playtester without guessing pass/fail.
 - Playtest review requires credible evidence, not unchecked pass/fail claims.
 - Reviews catch gaps that would block Architect, Coder, or a shippable slice.
-- `playtest-plan` may proceed in parallel with design; do not block architecture forever on playtest-plan closure, but the plan should exist or be near-final.
+- `playtest-plan` may proceed in parallel with design; do not block architecture on playtest-plan closure (it closes only after the playtest is complete), but the plan should exist or be near-final.
