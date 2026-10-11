@@ -79,9 +79,22 @@ jobs:
         if: needs.changes.outputs.code == 'true' && hashFiles('package.json') != ''
         run: npm run lint --if-present
 
-      - name: Test
+      # Coverage gate: test:coverage must fail below 80% (AGENTS.md / Vitest thresholds).
+      # Prefer test:coverage; fall back to test only until that script exists.
+      - name: Test with coverage
         if: needs.changes.outputs.code == 'true' && hashFiles('package.json') != ''
-        run: npm test --if-present
+        run: |
+          has_script() {
+            node -e "const s=require('./package.json').scripts||{}; process.exit(s['$1']?0:1)"
+          }
+          if has_script test:coverage; then
+            npm run test:coverage
+          elif has_script test; then
+            echo "Add a test:coverage script that fails below 80% coverage (AGENTS.md)."
+            npm test
+          else
+            echo "No test or test:coverage script yet; skipping tests."
+          fi
 
       - name: Build
         if: needs.changes.outputs.code == 'true' && hashFiles('package.json') != ''
