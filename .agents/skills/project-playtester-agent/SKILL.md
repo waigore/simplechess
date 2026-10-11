@@ -29,7 +29,7 @@ Match the session prompt in [prompts/project-playtester-agent.md](../../../promp
 ## Owns / creates / reviews
 
 - Owns `subtype:playtest` results.
-- Does not create downstream tasks.
+- Does not create downstream tasks (no fanout gate on `playtest`).
 - After results are ready → `assigned:designer` for content review. Planner closes after Designer accepts.
 - Not a content reviewer; revise when Designer requests more evidence or re-runs.
 

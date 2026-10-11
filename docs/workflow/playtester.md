@@ -12,7 +12,7 @@ Provide playtest results and ensure deliverables are fully tested against the re
 
 ## Creates / hands off
 
-Does not create downstream tasks. After results are ready, hand to Designer for content review (`assigned:designer`). Planner closes after Designer accepts.
+Does not create downstream tasks (no fanout gate on `playtest`). After results are ready, hand to Designer for content review (`assigned:designer`). Planner closes after Designer accepts.
 
 ## Reviews
 
